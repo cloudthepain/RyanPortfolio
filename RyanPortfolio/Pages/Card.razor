@@ -1,0 +1,84 @@
+﻿@page "/Card"
+
+<PageTitle>Card</PageTitle>
+
+@using DataAccessLibrary
+@using RyanPortfolio.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config;
+
+<button class="btn btn-primary" @onclick="InsertData">Touch Me</button>
+<button class="btn btn-primary" @onclick="DeleteData">Hurt Me</button>
+
+<MudTable Items="card">
+	<HeaderContent>
+		<MudTh>cardId</MudTh>
+		<MudTh>name</MudTh>
+		<MudTh>whiteCost</MudTh>
+		<MudTh>greenCost</MudTh>
+		<MudTh>blueCost</MudTh>
+		<MudTh>redCost</MudTh>
+		<MudTh>blackCost</MudTh>
+		<MudTh>colorlessCost</MudTh>
+		<MudTh>color</MudTh>
+		<MudTh>type</MudTh>
+		<MudTh>power</MudTh>
+		<MudTh>toughness</MudTh>
+		<MudTh>condition</MudTh>
+		<MudTh>language</MudTh>
+		<MudTh>isLegendary</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		@if (card == null)
+		{
+			<p><em>Loading...</em></p>
+		}
+		else
+		{
+			@foreach (var c in card)
+			{
+				<MudTh>@c.cardId</MudTh>
+			}
+		}
+	</RowTemplate>
+</MudTable>
+
+@code {
+	List<CardModel> card;
+
+	private async Task InsertData()
+	{
+		string sql = "INSERT INTO `card`(`name`,`whiteCost`,`greenCost`,`blueCost`,`redCost`,`blackCost`,`colorlessCost`,`color`,`type`,`power`,`toughness`,`condition`,`language`,`IsLegendary`,`cardsetid`)VALUES( @name, @whiteCost, @greenCost, @blueCost, @redCost, @blackCost, @colorlessCost, @color, @type, @power, @toughness, @condition, @language, @isLegendary, @cardSetId)";
+
+		await _data.SaveData(sql, new { name = "test", whiteCost = 20, greenCost = 20, blueCost = 20, redCost = 20, blackCost = 20, colorlessCost = 20, color = "five color", type = "test", power = "string", toughness = "string", condition = "test", language = "test", isLegendary = 0, cardSetId = 1 }, _config.GetConnectionString("classworkdata"));
+
+		await OnInitializedAsync();
+	}
+
+	private async Task UpdateData()
+	{
+		string sql = "Update card set name=@name where cardid=@cardid";
+
+		await _data.SaveData(sql, new { name = "test", cardid = 2 }, _config.GetConnectionString("classworkdata"));
+
+		await OnInitializedAsync();
+	}
+
+	private async Task DeleteData()
+	{
+		string sql = "Delete from card where name=@name";
+
+		await _data.SaveData(sql, new { name = "test" }, _config.GetConnectionString("classworkdata"));
+
+		await OnInitializedAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		string sql = "select * from card";
+
+		card = await _data.LoadData<CardModel, dynamic>(sql, new { }, _config.GetConnectionString("classworkdata"));
+	}
+
+}
